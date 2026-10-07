@@ -35,7 +35,7 @@ const ZOMBIES = {
 
 // ---------- save ----------
 function loadSave() {
-  const d = { level: 1, best: 1, wins: 0, kills: 0, sound: true };
+  const d = { level: 1, best: 1, wins: 0, kills: 0, sound: true, autoSun: true };
   try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s) Object.assign(d, s); } catch (e) { /* no storage */ }
   return d;
 }
@@ -194,7 +194,11 @@ function update(dt) {
   for (const s of G.suns) {
     s.ph += dt;
     if (s.falling) { s.y += 55 * dt; if (s.y >= s.ty) { s.y = s.ty; s.falling = false; } }
-    else { s.life -= dt; if (s.life <= 0) s.dead = true; }
+    else if (s.fly) {
+      const dx = 28 - s.x, dy = 25 - s.y, d = Math.hypot(dx, dy) || 1, sp = 700 * dt;
+      if (d < sp + 4) collectSun(s); else { s.x += dx / d * sp; s.y += dy / d * sp; }
+    }
+    else { s.life -= dt; if (save.autoSun && s.life < 8.3) s.fly = true; if (s.life <= 0) s.dead = true; }
   }
 
   // plants
@@ -655,6 +659,7 @@ function showMenu() {
   $('menu-level').textContent = 'PLAY  ·  LEVEL ' + save.level;
   $('menu-best').textContent = save.best > 1 ? 'Best: level ' + (save.best - 1) + ' survived  ·  ' + save.kills.toLocaleString() + ' zombies stopped' : 'Tap a seed, tap the lawn. Tap the sun to collect it.';
   $('btn-sound').textContent = save.sound ? '🔊 Sound on' : '🔇 Sound off';
+  $('btn-autosun').textContent = save.autoSun ? '☀ Auto-collect sun: ON' : '☀ Auto-collect sun: OFF';
   let html = '';
   for (const k in PLANTS) { const P = PLANTS[k]; html += `<div class="item"><img src="${seedIcon(k)}" alt=""><div class="info"><b>${P.name} <em>${P.cost} sun · level ${P.unlock}</em></b><span>${P.desc}</span></div></div>`; }
   for (const k in ZOMBIES) { const Z = ZOMBIES[k]; html += `<div class="item z"><div class="info"><b>🧟 ${Z.name} <em>${Z.hp} hp</em></b><span>${k === 'giant' ? 'Smashes plants flat instead of eating them.' : k === 'runner' ? 'Fast, but flimsy.' : k === 'cone' ? 'A traffic cone for a helmet.' : k === 'bucket' ? 'A bucket. Very tough.' : 'Your everyday shambler.'}</span></div></div>`; }
@@ -680,6 +685,7 @@ $('btn-play').addEventListener('click', () => startLevel(save.level));
 $('btn-howto').addEventListener('click', () => $('howto').classList.toggle('hidden'));
 $('btn-almanac').addEventListener('click', () => $('almanac').classList.toggle('hidden'));
 $('btn-sound').addEventListener('click', () => { save.sound = !save.sound; persist(); $('btn-sound').textContent = save.sound ? '🔊 Sound on' : '🔇 Sound off'; });
+$('btn-autosun').addEventListener('click', () => { save.autoSun = !save.autoSun; persist(); $('btn-autosun').textContent = save.autoSun ? '☀ Auto-collect sun: ON' : '☀ Auto-collect sun: OFF'; });
 $('btn-next').addEventListener('click', () => startLevel(save.level));
 $('btn-end-menu').addEventListener('click', showMenu);
 $('btn-reset').addEventListener('click', () => {

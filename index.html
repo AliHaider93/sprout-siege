@@ -60,8 +60,9 @@
   #end-stats b { font-size: 24px; color: #fff; } #end-stats span { font-size: 11px; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; }
 
   /* seed bar sits over the house band at the bottom of the canvas */
-  #seedbar { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 118); display: flex; align-items: center; justify-content: flex-start; gap: calc(var(--u) * 5); padding: 0 calc(var(--u) * 5); overflow-x: auto; overflow-y: hidden; touch-action: pan-x; scrollbar-width: none; }
-  #seedbar::-webkit-scrollbar { display: none; }
+  #seedbar { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 118); display: flex; align-items: center; gap: calc(var(--u) * 5); padding: 0 calc(var(--u) * 5); }
+  #seeds { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: calc(var(--u) * 5); overflow-x: auto; overflow-y: hidden; touch-action: pan-x; scrollbar-width: none; padding: calc(var(--u) * 6) 0; mask-image: linear-gradient(90deg, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent); }
+  #seeds::-webkit-scrollbar { display: none; }
   .seed { position: relative; appearance: none; border: calc(var(--u) * 3) solid #78350f; border-radius: calc(var(--u) * 10); background: #fef3c7; flex: 0 0 calc(var(--u) * 46); width: calc(var(--u) * 46); height: calc(var(--u) * 78); padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: hidden; font: inherit; box-shadow: 0 calc(var(--u) * 3) 0 #451a03; }
   .seed img { width: 90%; max-width: calc(var(--u) * 44); aspect-ratio: 1; margin-top: calc(var(--u) * 2); pointer-events: none; }
   .seed .sv { font-size: calc(var(--u) * 30); line-height: 1; margin-top: calc(var(--u) * 8); color: #78350f; }
@@ -71,7 +72,7 @@
   .seed.poor img { filter: grayscale(1) brightness(0.7); }
   .seed.poor .cost { color: #fca5a5; }
   .seed.sel { border-color: #fde047; box-shadow: 0 0 calc(var(--u) * 14) #fde047, 0 calc(var(--u) * 3) 0 #451a03; transform: translateY(calc(var(--u) * -4)); }
-  .seed.shovel { background: #e7e5e4; }
+  .seed.shovel { background: #e7e5e4; flex: 0 0 calc(var(--u) * 40); width: calc(var(--u) * 40); }
 </style>
 </head>
 <body>

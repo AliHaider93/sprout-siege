@@ -637,12 +637,12 @@ function seedIcon(type) {
 }
 function buildSeedBar() {
   if (!seedbar) return;
-  let html = '';
+  let html = '<div id="seeds">';
   for (const k of L.unlocked) {
     const P = PLANTS[k];
     html += `<button class="seed" data-seed="${k}" title="${P.name}: ${P.desc}"><img src="${seedIcon(k)}" alt=""><span class="cost">${P.cost}</span><span class="cdm"></span></button>`;
   }
-  html += `<button class="seed shovel" data-seed="shovel" title="Dig up a plant"><span class="sv">⛏</span><span class="cost">DIG</span></button>`;
+  html += `</div><button class="seed shovel" data-seed="shovel" title="Dig up a plant"><span class="sv">⛏</span><span class="cost">DIG</span></button>`;
   seedbar.innerHTML = html;
 }
 seedbar && seedbar.addEventListener('pointerdown', e => {

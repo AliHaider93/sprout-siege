@@ -637,7 +637,7 @@ function seedIcon(type) {
 }
 function buildSeedBar() {
   if (!seedbar) return;
-  let html = '<div id="seeds">';
+  let html = '<div id="seeds" class="' + (L.unlocked.length > 5 ? 'two' : 'one') + '">';
   for (const k of L.unlocked) {
     const P = PLANTS[k];
     html += `<button class="seed" data-seed="${k}" title="${P.name}: ${P.desc}"><img src="${seedIcon(k)}" alt=""><span class="cost">${P.cost}</span><span class="cdm"></span></button>`;

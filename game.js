@@ -24,6 +24,9 @@ const PLANTS = {
   thornpatch:  { name: 'Thornpatch',  cost: 100, cd: 14, hp: 500,  unlock: 4, desc: 'Ground spikes. Zombies walk over it and bleed. Cannot be eaten.', ground: true },
   icebloom:    { name: 'Icebloom',    cost: 175, cd: 8,  hp: 120,  unlock: 5, desc: 'Frozen seeds slow zombies to half speed.', shot: { dmg: 20, rate: 1.4, slow: 4 } },
   twinshooter: { name: 'Twinshooter', cost: 200, cd: 8,  hp: 120,  unlock: 6, desc: 'Two seeds per shot.', shot: { dmg: 20, rate: 1.4, count: 2 } },
+  twinbloom:   { name: 'Twinbloom',   cost: 125, cd: 8,  hp: 120,  unlock: 7, desc: 'Two flowers: makes 50 sun every 8s.' },
+  lobber:      { name: 'Lobber',      cost: 175, cd: 8,  hp: 120,  unlock: 8, desc: 'Lobs melons over your front line. Splash damage on impact.', lob: { dmg: 45, rate: 2.4, splash: 46 } },
+  gatling:     { name: 'Gatling',     cost: 250, cd: 10, hp: 120,  unlock: 9, desc: 'Four seeds per burst. Shreds anything in its column.', shot: { dmg: 20, rate: 1.4, count: 4 } },
 };
 const ZOMBIES = {
   basic:  { name: 'Shambler', hp: 100,  speed: 9,  dmg: 35,   r: 13 },
@@ -78,10 +81,10 @@ function makeLevel(n) {
   if (n >= 4) pool.push('bucket');
   if (n >= 6) pool.push('giant');
   if (n >= 8) pool.push('giant', 'bucket', 'runner');
-  const total = 8 + n * 5;
+  const total = 8 + n * 4;
   const sched = [];
   let t = 14;
-  const gap = Math.max(1.6, 6 - n * 0.35);
+  const gap = Math.max(2.0, 6 - n * 0.3);
   const main = Math.floor(total * 0.7), finalN = total - main;
   const midAt = Math.floor(main * 0.5);
   for (let i = 0; i < main; i++) {
@@ -96,20 +99,20 @@ function makeLevel(n) {
   t += 5;
   for (let k = 0; k < finalN; k++) sched.push({ t: t + k * 0.45, type: pick(pool), col: Math.floor(rng() * COLS), flag: k === 0 ? 'FINAL WAVE!' : null });
   sched.sort((a, b) => a.t - b.t);
-  return { n, sched, total: sched.length, startSun: 75 + Math.min(150, (n - 1) * 25), sunEvery: Math.max(4.5, 7.5 - n * 0.2),
+  return { n, sched, total: sched.length, startSun: 100 + Math.min(200, (n - 1) * 25), sunEvery: Math.max(3.5, 6.5 - n * 0.25),
     unlocked: Object.keys(PLANTS).filter(k => PLANTS[k].unlock <= n) };
 }
 
 // ---------- game state ----------
 let L = null;
 const G = {
-  state: 'menu', t: 0, grid: Array.from({ length: ROWS }, () => new Array(COLS).fill(null)), zombies: [], shots: [], suns: [], parts: [], floats: [], toasts: [],
+  state: 'menu', t: 0, grid: Array.from({ length: ROWS }, () => new Array(COLS).fill(null)), zombies: [], shots: [], lobs: [], suns: [], parts: [], floats: [], toasts: [],
   sun: 0, spawned: 0, kills: 0, sunT: 0, cd: {}, selected: null, gnomes: [], gnomeRun: [], shake: 0, sunCollected: 0, planted: 0, lost: false,
 };
 
 function startLevel(n) {
   L = makeLevel(n);
-  G.state = 'play'; G.t = 0; G.zombies = []; G.shots = []; G.suns = []; G.parts = []; G.floats = []; G.toasts = [];
+  G.state = 'play'; G.t = 0; G.zombies = []; G.shots = []; G.lobs = []; G.suns = []; G.parts = []; G.floats = []; G.toasts = [];
   G.grid = []; for (let r = 0; r < ROWS; r++) { G.grid.push(new Array(COLS).fill(null)); }
   G.sun = L.startSun; G.spawned = 0; G.kills = 0; G.sunT = 4; G.cd = {}; G.selected = null; G.shake = 0; G.sunCollected = 0; G.planted = 0; G.lost = false;
   for (const k in PLANTS) G.cd[k] = 0;
@@ -123,7 +126,7 @@ function plant(type, r, c) {
   const P = PLANTS[type];
   if (G.grid[r][c] || G.sun < P.cost || G.cd[type] > 0) return false;
   G.sun -= P.cost; G.cd[type] = P.cd; G.planted++;
-  G.grid[r][c] = { type, r, c, x: colX(c), y: rowY(r), hp: P.hp, maxHp: P.hp, timer: type === 'sunbloom' ? 6 : type === 'blastberry' ? 1.2 : Math.random() * 0.5, ph: Math.random() * TAU, hit: 0 };
+  G.grid[r][c] = { type, r, c, x: colX(c), y: rowY(r), hp: P.hp, maxHp: P.hp, timer: type === 'sunbloom' || type === 'twinbloom' ? 5 : type === 'blastberry' ? 1.2 : Math.random() * 0.5, ph: Math.random() * TAU, hit: 0 };
   puff(colX(c), rowY(r), '#a3e635', 8);
   beep(420, 0.08, 'triangle', 0.04);
   return true;
@@ -207,9 +210,17 @@ function update(dt) {
     if (!p) continue;
     const P = PLANTS[p.type];
     if (p.hit > 0) p.hit -= dt;
-    if (p.type === 'sunbloom') {
+    if (p.type === 'sunbloom' || p.type === 'twinbloom') {
       p.timer -= dt;
-      if (p.timer <= 0) { p.timer = 10; addSun(p.x + (Math.random() - 0.5) * 30, p.y + 10, false); }
+      if (p.timer <= 0) { p.timer = 8; addSun(p.x + (Math.random() - 0.5) * 30, p.y + 10, false); if (p.type === 'twinbloom') addSun(p.x + 18, p.y - 6, false); }
+    } else if (P.lob) {
+      p.timer -= dt;
+      if (p.timer <= 0) {
+        let tgt = null;
+        for (const z of G.zombies) if (!z.dead && z.col === c && z.y < p.y - 10 && z.y > 30 && (!tgt || z.y > tgt.y)) tgt = z;
+        if (tgt) { p.timer = P.lob.rate; G.lobs.push({ x: p.x, y: p.y - 10, sx: p.x, sy: p.y - 10, tx: tgt.x, ty: tgt.y + tgt.speed * 0.8, t: 0, dur: 0.8, dmg: P.lob.dmg, splash: P.lob.splash, dead: false }); beep(500, 0.08, 'triangle', 0.03); }
+        else p.timer = 0.1;
+      }
     } else if (p.type === 'blastberry') {
       p.timer -= dt;
       if (p.timer <= 0) explodeAt(r, c);
@@ -250,6 +261,18 @@ function update(dt) {
     }
   }
 
+  // lobbed melons: arc to the target spot, splash on landing
+  for (const l of G.lobs) {
+    if (l.dead) continue;
+    l.t += dt;
+    const k = Math.min(1, l.t / l.dur);
+    l.x = l.sx + (l.tx - l.sx) * k; l.y = l.sy + (l.ty - l.sy) * k - Math.sin(k * Math.PI) * 90;
+    if (k >= 1) {
+      l.dead = true; puff(l.tx, l.ty, '#86efac', 10); G.parts.push({ x: l.tx, y: l.ty, ring: true, life: 0.25, R: l.splash });
+      for (const z of G.zombies) { if (z.dead) continue; if ((z.x - l.tx) ** 2 + (z.y - l.ty) ** 2 < l.splash * l.splash) { z.hp -= l.dmg; z.hit = 0.15; if (z.hp <= 0) killZombie(z); } }
+      beep(160, 0.12, 'square', 0.04);
+    }
+  }
   // zombies
   for (const z of G.zombies) {
     if (z.dead) continue;
@@ -298,6 +321,7 @@ function update(dt) {
 
   G.zombies = G.zombies.filter(z => !z.dead);
   G.shots = G.shots.filter(s => !s.dead);
+  G.lobs = G.lobs.filter(l => !l.dead);
   G.suns = G.suns.filter(s => !s.dead);
   for (let i = G.parts.length - 1; i >= 0; i--) {
     const p = G.parts[i]; p.life -= dt;
@@ -387,9 +411,32 @@ function drawPlant(c, type, x, y, s, t, ph, hit) {
       face(c, 0, -8 + bob, 1, false);
       break;
     }
-    case 'seedshooter': case 'icebloom': case 'twinshooter': {
-      const col = type === 'icebloom' ? '#38bdf8' : '#4ade80', dark = type === 'icebloom' ? '#0369a1' : '#15803d';
+    case 'twinbloom': {
+      stem(c, -8, 8, 6); stem(c, 9, 10, 2);
+      for (const [hx, hy, hr] of [[-8, -10, 0.8], [9, -2, 0.7]]) {
+        c.save(); c.translate(hx, hy + bob); c.rotate(t * 0.5 + hx);
+        c.fillStyle = '#facc15';
+        for (let i = 0; i < 9; i++) { c.rotate(TAU / 9); c.beginPath(); c.ellipse(0, -11 * hr, 4 * hr, 7 * hr, 0, 0, TAU); c.fill(); }
+        c.restore();
+        c.fillStyle = '#f59e0b'; c.beginPath(); c.arc(hx, hy + bob, 8 * hr, 0, TAU); c.fill();
+        face(c, hx, hy + bob, 0.8 * hr, false);
+      }
+      break;
+    }
+    case 'lobber': {
+      stem(c, 0, 8, 6);
+      c.fillStyle = '#15803d'; c.beginPath(); c.ellipse(0, 4 + bob, 20, 14, 0, 0, TAU); c.fill();
+      c.fillStyle = '#4ade80'; c.beginPath(); c.ellipse(-2, 1 + bob, 14, 9, 0, 0, TAU); c.fill();
+      c.strokeStyle = '#166534'; c.lineWidth = 2; for (let i = -1; i <= 1; i++) { c.beginPath(); c.moveTo(i * 8 - 4, -6 + bob); c.quadraticCurveTo(i * 8, 4 + bob, i * 8 - 4, 14 + bob); c.stroke(); }
+      c.fillStyle = '#78350f'; c.fillRect(-3, -22 + bob, 6, 16);
+      c.fillStyle = '#bef264'; c.beginPath(); c.arc(0, -24 + bob, 7, 0, TAU); c.fill();
+      face(c, -2, 2 + bob, 0.9, true);
+      break;
+    }
+    case 'seedshooter': case 'icebloom': case 'twinshooter': case 'gatling': {
+      const col = type === 'icebloom' ? '#38bdf8' : type === 'gatling' ? '#22c55e' : '#4ade80', dark = type === 'icebloom' ? '#0369a1' : type === 'gatling' ? '#064e3b' : '#15803d';
       stem(c, 0, 8, 10);
+      if (type === 'gatling') { c.fillStyle = '#334155'; roundRect(c, -14, -34 + bob, 28, 12, 4); c.fill(); c.fillStyle = '#0f172a'; for (const bx of [-9, -3, 3, 9]) { c.beginPath(); c.ellipse(bx, -28 + bob, 2.4, 4, 0, 0, TAU); c.fill(); } c.fillStyle = '#475569'; roundRect(c, -6, -12 + bob, 12, 8, 2); c.fill(); }
       const heads = type === 'twinshooter' ? [[-7, -4], [7, -12]] : [[0, -8]];
       for (const [hx, hy] of heads) {
         c.fillStyle = col; c.beginPath(); c.arc(hx, hy + bob, 13, 0, TAU); c.fill();
@@ -526,6 +573,11 @@ function draw() {
     ctx.fillStyle = s.ice ? '#7dd3fc' : '#65a30d'; ctx.beginPath(); ctx.ellipse(s.x, s.y, 4, 6, 0, 0, TAU); ctx.fill();
     ctx.fillStyle = s.ice ? '#e0f2fe' : '#bef264'; ctx.beginPath(); ctx.arc(s.x - 1, s.y - 2, 1.6, 0, TAU); ctx.fill();
   }
+  for (const l of G.lobs) {
+    ctx.fillStyle = 'rgba(0,0,0,0.2)'; ctx.beginPath(); ctx.ellipse(l.x, l.sy + (l.ty - l.sy) * Math.min(1, l.t / l.dur) + 6, 7, 3, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#15803d'; ctx.beginPath(); ctx.arc(l.x, l.y, 8, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#86efac'; ctx.beginPath(); ctx.arc(l.x - 2, l.y - 2, 3.5, 0, TAU); ctx.fill();
+  }
   // zombies (sorted by y so lower ones overlap)
   const zs = G.zombies.slice().sort((a, b) => a.y - b.y);
   for (const z of zs) drawZombie(ctx, z, G.t);
@@ -643,7 +695,8 @@ canvas.addEventListener('pointerleave', () => { G.hover = null; });
 window.addEventListener('keydown', e => {
   if (G.state !== 'play' || !L) return;
   const n = parseInt(e.key, 10);
-  if (n >= 1 && n <= L.unlocked.length) G.selected = L.unlocked[n - 1];
+  const idx = e.key === '0' ? 9 : n - 1;
+  if (!isNaN(idx) && idx >= 0 && idx < L.unlocked.length) G.selected = L.unlocked[idx];
   if (e.key === 'Escape') G.selected = null;
   if (e.key === 'x' || e.key === 'X') G.selected = 'shovel';
 });

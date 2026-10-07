@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Sprout Siege</title>
+<meta name="description" content="Plant shooting plants on your lawn and stop the shambling zombie horde before it reaches your house. A free browser game for phones and desktop.">
+<link rel="canonical" href="https://alihaider93.github.io/sprout-siege/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sprout Siege">
+<meta property="og:title" content="Sprout Siege — plants vs the horde">
+<meta property="og:description" content="Tap to plant Seedshooters, Sunblooms, Nutwalls and Blastberries. Collect sun, hold the lawn, stop the zombies. Free, no install.">
+<meta property="og:url" content="https://alihaider93.github.io/sprout-siege/">
+<meta property="og:image" content="https://alihaider93.github.io/sprout-siege/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sprout Siege — plants vs the horde">
+<meta name="twitter:description" content="Tap to plant Seedshooters, Sunblooms, Nutwalls and Blastberries. Collect sun, hold the lawn, stop the zombies. Free, no install.">
+<meta name="twitter:image" content="https://alihaider93.github.io/sprout-siege/og.png">
+<meta name="theme-color" content="#1e293b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: #0f172a; color: #f1f5f9; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; overscroll-behavior: none; }
+  body { display: flex; align-items: center; justify-content: center; height: 100dvh; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #wrap { position: relative; --u: 1px; }
+  canvas { display: block; touch-action: none; border-radius: 6px; }
+  .hidden { display: none !important; }
+
+  .screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px 20px; background: rgba(8, 12, 30, 0.92); backdrop-filter: blur(4px); border-radius: 6px; text-align: center; overflow-y: auto; touch-action: pan-y; }
+  h1 { margin: 0; font-size: clamp(34px, 11vw, 54px); line-height: 1; letter-spacing: 1px; background: linear-gradient(180deg, #bef264, #65a30d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h1 small { display: block; font-size: 0.32em; letter-spacing: 6px; color: #a3e635; -webkit-text-fill-color: #a3e635; margin-top: 8px; }
+  h2 { margin: 0; font-size: 40px; letter-spacing: 2px; }
+  h2.win { color: #a3e635; } h2.lose { color: #f87171; }
+  p { margin: 0; color: #cbd5e1; font-size: 15px; line-height: 1.45; max-width: 320px; }
+  .btn { appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 800; letter-spacing: 1px; color: #fff; padding: 15px 26px; border-radius: 16px; background: linear-gradient(180deg, #84cc16, #4d7c0f); box-shadow: 0 6px 0 #365314, 0 10px 20px rgba(0,0,0,0.35); font-size: 18px; min-width: 230px; transition: transform .08s, box-shadow .08s; }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #365314; }
+  .btn.alt { background: linear-gradient(180deg, #475569, #334155); box-shadow: 0 6px 0 #1e293b, 0 10px 20px rgba(0,0,0,0.35); font-size: 15px; padding: 12px 20px; }
+  .btn.alt:active { box-shadow: 0 2px 0 #1e293b; }
+  .btn.x { background: linear-gradient(180deg, #111827, #000); box-shadow: 0 6px 0 #1f2937, 0 10px 20px rgba(0,0,0,0.35); text-decoration: none; display: inline-block; }
+  .btn.x:active { box-shadow: 0 2px 0 #1f2937; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .row .btn { min-width: 0; flex: 1 1 120px; }
+  .link { background: none; border: 0; color: #94a3b8; font: inherit; font-size: 13px; cursor: pointer; text-decoration: underline; padding: 6px; }
+  #howto { background: rgba(255,255,255,0.06); border-radius: 14px; padding: 14px 16px; text-align: left; font-size: 14px; line-height: 1.5; max-width: 330px; }
+  #howto b { color: #bef264; }
+  #almanac { width: 100%; max-width: 350px; display: flex; flex-direction: column; gap: 8px; }
+  .item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.07); border-radius: 14px; padding: 8px 12px; text-align: left; }
+  .item img { width: 44px; height: 44px; flex: none; }
+  .item.z { padding-left: 16px; }
+  .item .info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .item b { font-size: 15px; } .item em { font-style: normal; color: #fde047; font-size: 12px; margin-left: 6px; }
+  .item span { font-size: 12px; color: #94a3b8; }
+  #end-stats { display: flex; gap: 10px; width: 100%; max-width: 340px; }
+  #end-stats div { flex: 1; background: rgba(255,255,255,0.07); border-radius: 14px; padding: 12px 6px; display: flex; flex-direction: column; }
+  #end-stats b { font-size: 24px; color: #fff; } #end-stats span { font-size: 11px; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* seed bar sits over the house band at the bottom of the canvas */
+  #seedbar { position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--u) * 118); display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 5); padding: 0 calc(var(--u) * 5); }
+  .seed { position: relative; appearance: none; border: calc(var(--u) * 3) solid #78350f; border-radius: calc(var(--u) * 10); background: #fef3c7; flex: 1 1 0; min-width: 0; max-width: calc(var(--u) * 50); height: calc(var(--u) * 78); padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: hidden; font: inherit; box-shadow: 0 calc(var(--u) * 3) 0 #451a03; }
+  .seed img { width: 90%; max-width: calc(var(--u) * 44); aspect-ratio: 1; margin-top: calc(var(--u) * 2); pointer-events: none; }
+  .seed .sv { font-size: calc(var(--u) * 30); line-height: 1; margin-top: calc(var(--u) * 8); color: #78350f; }
+  .seed .cost { position: absolute; left: 0; right: 0; bottom: 0; background: #78350f; color: #fde68a; font-weight: 800; font-size: calc(var(--u) * 13); line-height: calc(var(--u) * 20); }
+  .seed .cdm { position: absolute; inset: 0; background: rgba(15,23,42,0.6); transform-origin: top; transform: scaleY(0); pointer-events: none; }
+  .seed.cooling .cdm { transform: scaleY(1); height: var(--cd, 0%); }
+  .seed.poor img { filter: grayscale(1) brightness(0.7); }
+  .seed.poor .cost { color: #fca5a5; }
+  .seed.sel { border-color: #fde047; box-shadow: 0 0 calc(var(--u) * 14) #fde047, 0 calc(var(--u) * 3) 0 #451a03; transform: translateY(calc(var(--u) * -4)); }
+  .seed.shovel { background: #e7e5e4; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c" width="400" height="720"></canvas>
+  <div id="seedbar" class="hidden"></div>
+
+  <div id="menu" class="screen">
+    <h1>SPROUT<br>SIEGE<small>PLANT · SHOOT · SURVIVE</small></h1>
+    <p id="menu-best"></p>
+    <button class="btn" id="btn-play"><span id="menu-level">PLAY</span></button>
+    <button class="btn alt" id="btn-howto">❓ HOW TO PLAY</button>
+    <div id="howto" class="hidden">
+      <b>Tap a seed card</b> at the bottom, then <b>tap a lawn tile</b> to plant it. Plants cost <b>sun</b>.<br>
+      <b>Tap the suns</b> that fall from the sky or sprout from Sunblooms to collect them.<br>
+      Zombies shamble <b>down the columns</b> toward your house and eat anything in their way. Shooters only hit zombies in their own column.<br>
+      Each column has a <b>garden gnome</b> that clears it once if a zombie slips through. After that, the next one gets in.<br>
+      Survive every wave to win. New plants unlock as you clear levels. Keys 1-7 pick seeds, X picks the shovel.
+    </div>
+    <button class="btn alt" id="btn-almanac">📖 PLANTS &amp; ZOMBIES</button>
+    <div id="almanac" class="hidden"></div>
+    <div class="row">
+      <button class="link" id="btn-sound">🔊 Sound on</button>
+      <button class="link" id="btn-reset">Reset progress</button>
+    </div>
+  </div>
+
+  <div id="end" class="screen hidden">
+    <h2 id="end-title">GARDEN SAFE!</h2>
+    <p id="end-sub"></p>
+    <div id="end-stats"></div>
+    <button class="btn" id="btn-next">NEXT LEVEL ▶</button>
+    <a class="btn x" id="btn-share" href="#" target="_blank" rel="noopener">𝕏 SHARE YOUR SCORE</a>
+    <button class="btn alt" id="btn-end-menu">MENU</button>
+  </div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>

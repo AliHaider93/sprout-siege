@@ -103,7 +103,7 @@ function makeLevel(n) {
 // ---------- game state ----------
 let L = null;
 const G = {
-  state: 'menu', t: 0, grid: [], zombies: [], shots: [], suns: [], parts: [], floats: [], toasts: [],
+  state: 'menu', t: 0, grid: Array.from({ length: ROWS }, () => new Array(COLS).fill(null)), zombies: [], shots: [], suns: [], parts: [], floats: [], toasts: [],
   sun: 0, spawned: 0, kills: 0, sunT: 0, cd: {}, selected: null, gnomes: [], gnomeRun: [], shake: 0, sunCollected: 0, planted: 0, lost: false,
 };
 
@@ -508,7 +508,7 @@ function draw() {
   }
   // plants
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    const p = G.grid[r][c]; if (!p) continue;
+    const p = G.grid[r] && G.grid[r][c]; if (!p) continue;
     ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.beginPath(); ctx.ellipse(p.x, p.y + 20, 18, 6, 0, 0, TAU); ctx.fill();
     drawPlant(ctx, p.type, p.x, p.y, 1, G.t, p.ph, p.hit);
     if (p.hp < p.maxHp && p.type !== 'blastberry') {

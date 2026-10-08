@@ -31,7 +31,7 @@ No install, no build step, no dependencies. One HTML page plus one JavaScript fi
 
 ## Zombies
 
-Shambler, Conehead (level 2), Sprinter (level 3), Buckethead (level 4), and the plant-smashing Hulk (level 6). Levels are generated from a seed, so each level plays the same way every time.
+Shambler, Roadworker (level 2), Sprinter (level 3), Riot Zombie (level 4), and the plant-smashing Hulk (level 6). Levels are generated from a seed, so each level plays the same way every time.
 
 ## Running locally
 

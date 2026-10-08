@@ -30,9 +30,9 @@ const PLANTS = {
 };
 const ZOMBIES = {
   basic:  { name: 'Shambler', hp: 100,  speed: 9,  dmg: 35,   r: 13 },
-  cone:   { name: 'Conehead', hp: 260,  speed: 9,  dmg: 35,   r: 13 },
+  worker: { name: 'Roadworker', hp: 260,  speed: 9,  dmg: 35,   r: 13 },
   runner: { name: 'Sprinter', hp: 80,   speed: 22, dmg: 35,   r: 11 },
-  bucket: { name: 'Buckethead', hp: 650, speed: 8, dmg: 35,   r: 13 },
+  riot:   { name: 'Riot Zombie', hp: 650, speed: 8, dmg: 35,   r: 13 },
   giant:  { name: 'Hulk',     hp: 1600, speed: 6,  dmg: 0,    r: 19, smash: true },
 };
 
@@ -76,11 +76,11 @@ function makeLevel(n) {
   const rng = mulberry32(n * 31337 + 7);
   const pick = arr => arr[Math.floor(rng() * arr.length)];
   const pool = ['basic', 'basic', 'basic'];
-  if (n >= 2) pool.push('cone', 'cone');
+  if (n >= 2) pool.push('worker', 'worker');
   if (n >= 3) pool.push('runner');
-  if (n >= 4) pool.push('bucket');
+  if (n >= 4) pool.push('riot');
   if (n >= 6) pool.push('giant');
-  if (n >= 8) pool.push('giant', 'bucket', 'runner');
+  if (n >= 8) pool.push('giant', 'riot', 'runner');
   const total = 8 + n * 4;
   const sched = [];
   let t = 14;
@@ -497,8 +497,21 @@ function drawZombie(c, z, t) {
   c.fillStyle = '#ef4444'; c.beginPath(); c.arc(-3.5, -16, 1, 0, TAU); c.fill();
   c.strokeStyle = '#365314'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(-4, -9); c.lineTo(5, -10); c.stroke();
   c.fillStyle = '#f5f5f4'; c.fillRect(-2, -10, 2, 2); c.fillRect(2, -10.5, 2, 2);
-  if (z.type === 'cone') { c.fillStyle = '#f97316'; c.beginPath(); c.moveTo(-9, -22); c.lineTo(0, -42); c.lineTo(9, -22); c.fill(); c.fillStyle = '#fdba74'; c.fillRect(-9, -24, 18, 3); }
-  if (z.type === 'bucket') { c.fillStyle = '#9ca3af'; c.beginPath(); c.moveTo(-11, -22); c.lineTo(-8, -40); c.lineTo(8, -40); c.lineTo(11, -22); c.fill(); c.fillStyle = '#d1d5db'; c.fillRect(-11, -24, 22, 3); }
+  if (z.type === 'worker') {
+    // reflective vest over the body, yellow hard hat with a brim
+    c.fillStyle = '#f97316'; roundRect(c, -9, -7, 18, 15, 3); c.fill(); c.fillStyle = '#e5e7eb'; c.fillRect(-9, -2, 18, 3); c.fillStyle = '#6b7280'; c.fillRect(-2, -7, 4, 15);
+    c.fillStyle = '#facc15'; c.beginPath(); c.arc(0, -19, 11, Math.PI, 0); c.fill(); c.fillRect(-13, -20, 26, 4);
+    c.fillStyle = '#fef08a'; c.fillRect(-2, -29, 4, 9); c.fillStyle = '#ca8a04'; c.fillRect(-13, -17, 26, 2);
+  }
+  if (z.type === 'riot') {
+    // riot helmet with a visor, and a shield held out in front
+    c.fillStyle = '#1f2937'; c.beginPath(); c.arc(0, -17, 12, Math.PI, 0); c.fill(); c.fillRect(-12, -17, 24, 6);
+    c.fillStyle = 'rgba(125,211,252,0.55)'; roundRect(c, -9, -17, 18, 9, 3); c.fill();
+    c.fillStyle = '#374151'; c.fillRect(-12, -11, 24, 2);
+    c.fillStyle = '#111827'; roundRect(c, -22, -10, 14, 28, 4); c.fill();
+    c.fillStyle = 'rgba(148,163,184,0.45)'; roundRect(c, -19, -7, 8, 22, 3); c.fill();
+    c.fillStyle = '#9ca3af'; c.fillRect(-16, 0, 3, 6);
+  }
   if (z.type === 'runner') { c.fillStyle = '#ef4444'; c.fillRect(-10, -20, 20, 3); }
   if (z.slow > 0) { c.fillStyle = 'rgba(125,211,252,0.45)'; c.beginPath(); c.arc(0, -8, 18, 0, TAU); c.fill(); }
   c.restore();
@@ -715,7 +728,7 @@ function showMenu() {
   $('btn-autosun').textContent = save.autoSun ? '☀ Auto-collect sun: ON' : '☀ Auto-collect sun: OFF';
   let html = '';
   for (const k in PLANTS) { const P = PLANTS[k]; html += `<div class="item"><img src="${seedIcon(k)}" alt=""><div class="info"><b>${P.name} <em>${P.cost} sun · level ${P.unlock}</em></b><span>${P.desc}</span></div></div>`; }
-  for (const k in ZOMBIES) { const Z = ZOMBIES[k]; html += `<div class="item z"><div class="info"><b>🧟 ${Z.name} <em>${Z.hp} hp</em></b><span>${k === 'giant' ? 'Smashes plants flat instead of eating them.' : k === 'runner' ? 'Fast, but flimsy.' : k === 'cone' ? 'A traffic cone for a helmet.' : k === 'bucket' ? 'A bucket. Very tough.' : 'Your everyday shambler.'}</span></div></div>`; }
+  for (const k in ZOMBIES) { const Z = ZOMBIES[k]; html += `<div class="item z"><div class="info"><b>🧟 ${Z.name} <em>${Z.hp} hp</em></b><span>${k === 'giant' ? 'Smashes plants flat instead of eating them.' : k === 'runner' ? 'Fast, but flimsy.' : k === 'worker' ? 'Hard hat and vest. Takes a beating.' : k === 'riot' ? 'Helmet, visor and a riot shield. Very tough.' : 'Your everyday shambler.'}</span></div></div>`; }
   $('almanac').innerHTML = html;
   showScreen('menu');
 }

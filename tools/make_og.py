@@ -53,10 +53,16 @@ def zombie(d, x, y, s, hat=None):
     d.ellipse((x - 11 * s, y - 32 * s, x + 11 * s, y - 10 * s), fill="#a3e635")
     d.ellipse((x - 6 * s, y - 24 * s, x - 2 * s, y - 20 * s), fill="#365314")
     d.ellipse((x + 2 * s, y - 23 * s, x + 5 * s, y - 20 * s), fill="#365314")
-    if hat == "cone":
-        d.polygon([(x - 10 * s, y - 30 * s), (x, y - 52 * s), (x + 10 * s, y - 30 * s)], fill="#f97316")
-    if hat == "bucket":
-        d.polygon([(x - 12 * s, y - 30 * s), (x - 9 * s, y - 50 * s), (x + 9 * s, y - 50 * s), (x + 12 * s, y - 30 * s)], fill="#9ca3af")
+    if hat == "worker":
+        d.rounded_rectangle((x - 9 * s, y - 8 * s, x + 9 * s, y + 8 * s), int(3 * s), fill="#f97316")
+        d.rectangle((x - 9 * s, y - 2 * s, x + 9 * s, y + 1 * s), fill="#e5e7eb")
+        d.pieslice((x - 11 * s, y - 42 * s, x + 11 * s, y - 20 * s), 180, 360, fill="#facc15")
+        d.rectangle((x - 13 * s, y - 32 * s, x + 13 * s, y - 28 * s), fill="#facc15")
+    if hat == "riot":
+        d.pieslice((x - 12 * s, y - 44 * s, x + 12 * s, y - 20 * s), 180, 360, fill="#1f2937")
+        d.rectangle((x - 12 * s, y - 32 * s, x + 12 * s, y - 26 * s), fill="#1f2937")
+        d.rounded_rectangle((x - 9 * s, y - 31 * s, x + 9 * s, y - 23 * s), int(3 * s), fill=(125, 211, 252, 150))
+        d.rounded_rectangle((x - 24 * s, y - 12 * s, x - 10 * s, y + 16 * s), int(4 * s), fill="#111827")
 
 
 def card():
@@ -86,7 +92,7 @@ def card():
     for r in range(5):
         for k in range(2 + (r % 2)):
             x = 760 + k * 120 + random.randint(-25, 25)
-            zombie(d, x, 190 + r * 100, 1.6, hat=random.choice([None, None, "cone", "bucket"]))
+            zombie(d, x, 190 + r * 100, 1.6, hat=[None, "worker", "riot", None, "worker"][(r + k) % 5])
     # title banner
     banner = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     bd = ImageDraw.Draw(banner)

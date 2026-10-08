@@ -38,9 +38,11 @@ def sunbloom(d, x, y, s):
     d.ellipse((x + 2 * s, y - 4 * s, x + 6 * s, y), fill="#111827")
 
 
-def nutwall(d, x, y, s):
-    d.ellipse((x - 22 * s, y - 26 * s, x + 22 * s, y + 26 * s), fill="#78350f")
-    d.ellipse((x - 17 * s, y - 22 * s, x + 11 * s, y + 12 * s), fill="#b45309")
+def boulder(d, x, y, s):
+    d.polygon([(x - 20 * s, y + 6 * s), (x - 16 * s, y - 14 * s), (x - 4 * s, y - 22 * s), (x + 12 * s, y - 18 * s), (x + 21 * s, y - 2 * s), (x + 16 * s, y + 18 * s), (x - 10 * s, y + 20 * s)], fill="#44403c")
+    d.polygon([(x - 14 * s, y + 4 * s), (x - 11 * s, y - 11 * s), (x - 2 * s, y - 17 * s), (x + 9 * s, y - 13 * s), (x + 14 * s, y), (x + 10 * s, y + 12 * s), (x - 7 * s, y + 14 * s)], fill="#78716c")
+    d.line((x + 2 * s, y - 20 * s, x + 1 * s, y - 32 * s), fill="#15803d", width=int(3 * s))
+    d.ellipse((x - 8 * s, y - 38 * s, x + 2 * s, y - 30 * s), fill="#22c55e")
     d.ellipse((x - 8 * s, y - 8 * s, x - 3 * s, y - 3 * s), fill="#111827")
     d.ellipse((x + 2 * s, y - 8 * s, x + 7 * s, y - 3 * s), fill="#111827")
 
@@ -82,7 +84,7 @@ def card():
         shooter(d, 260, 180 + r * 100, 1.5)
         if r in (1, 3):
             shooter(d, 370, 180 + r * 100, 1.5, col="#38bdf8", dark="#0369a1")
-        nutwall(d, 480, 180 + r * 100, 1.4)
+        boulder(d, 480, 180 + r * 100, 1.4)
     # seeds in flight
     for r in range(5):
         for k in range(3):

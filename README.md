@@ -20,7 +20,7 @@ No install, no build step, no dependencies. One HTML page plus one JavaScript fi
 |---|---|---|---|
 | Sunbloom | 50 | level 1 | Makes 25 sun every 8 s |
 | Seedshooter | 100 | level 1 | Shoots a seed every 1.4 s |
-| Nutwall | 50 | level 2 | Tough wall |
+| Boulder Bulb | 50 | level 2 | Rock-hard wall |
 | Blastberry | 150 | level 3 | Explodes, clears a 3×3 area |
 | Thornpatch | 100 | level 4 | Ground spikes, cannot be eaten |
 | Icebloom | 175 | level 5 | Frozen seeds slow zombies |

@@ -19,7 +19,7 @@ const rowOf = y => Math.floor((y - GRID_TOP) / CH);
 const PLANTS = {
   sunbloom:    { name: 'Sunbloom',    cost: 50,  cd: 6,  hp: 120,  unlock: 1, desc: 'Makes 25 sun every 10s. Tap the sun to collect it.' },
   seedshooter: { name: 'Seedshooter', cost: 100, cd: 6,  hp: 120,  unlock: 1, desc: 'Shoots a seed up its column every 1.4s.', shot: { dmg: 20, rate: 1.4 } },
-  nutwall:     { name: 'Nutwall',     cost: 50,  cd: 18, hp: 1800, unlock: 2, desc: 'A tough wall zombies must chew through.' },
+  boulder:     { name: 'Boulder Bulb', cost: 50, cd: 18, hp: 1800, unlock: 2, desc: 'A rock-hard bulb zombies must chew through.' },
   blastberry:  { name: 'Blastberry',  cost: 150, cd: 28, hp: 100,  unlock: 3, desc: 'Explodes after a moment, wiping the 3×3 area around it.' },
   thornpatch:  { name: 'Thornpatch',  cost: 100, cd: 14, hp: 500,  unlock: 4, desc: 'Ground spikes. Zombies walk over it and bleed. Cannot be eaten.', ground: true },
   icebloom:    { name: 'Icebloom',    cost: 175, cd: 8,  hp: 120,  unlock: 5, desc: 'Frozen seeds slow zombies to half speed.', shot: { dmg: 20, rate: 1.4, slow: 4 } },
@@ -448,11 +448,14 @@ function drawPlant(c, type, x, y, s, t, ph, hit) {
       if (type === 'icebloom') { c.fillStyle = 'rgba(224,242,254,0.8)'; for (let i = 0; i < 4; i++) { c.beginPath(); c.arc(-10 + i * 7, -20 + bob + (i % 2) * 4, 2, 0, TAU); c.fill(); } }
       break;
     }
-    case 'nutwall': {
-      c.fillStyle = '#78350f'; c.beginPath(); c.ellipse(0, 0 + bob, 20, 24, 0, 0, TAU); c.fill();
-      c.fillStyle = '#b45309'; c.beginPath(); c.ellipse(-3, -4 + bob, 14, 17, 0, 0, TAU); c.fill();
-      c.fillStyle = '#92400e'; c.beginPath(); c.ellipse(0, 12 + bob, 10, 5, 0, 0, TAU); c.fill();
-      face(c, 0, -4 + bob, 1.1, false);
+    case 'boulder': {
+      // a craggy grey bulb with a sprout on top
+      c.fillStyle = '#44403c'; c.beginPath(); c.moveTo(-20, 6 + bob); c.lineTo(-16, -14 + bob); c.lineTo(-4, -22 + bob); c.lineTo(12, -18 + bob); c.lineTo(21, -2 + bob); c.lineTo(16, 18 + bob); c.lineTo(-10, 20 + bob); c.closePath(); c.fill();
+      c.fillStyle = '#78716c'; c.beginPath(); c.moveTo(-14, 4 + bob); c.lineTo(-11, -11 + bob); c.lineTo(-2, -17 + bob); c.lineTo(9, -13 + bob); c.lineTo(14, 0 + bob); c.lineTo(10, 12 + bob); c.lineTo(-7, 14 + bob); c.closePath(); c.fill();
+      c.fillStyle = '#a8a29e'; c.beginPath(); c.moveTo(-9, -6 + bob); c.lineTo(-3, -13 + bob); c.lineTo(5, -9 + bob); c.lineTo(-1, -4 + bob); c.closePath(); c.fill();
+      c.strokeStyle = '#15803d'; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(2, -20 + bob); c.quadraticCurveTo(4, -28, 1, -32 + bob); c.stroke();
+      leaf(c, 1, -30 + bob, -2.4, 10, 4, '#22c55e'); leaf(c, 1, -30 + bob, -0.6, 10, 4, '#16a34a');
+      face(c, 0, 0 + bob, 1.1, false);
       break;
     }
     case 'blastberry': {
